@@ -1,0 +1,93 @@
+name: Practical 7 - CI and Artifact Delivery
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    name: CI - lint, tests, build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js with npm cache
+        uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Run tests and save JUnit report
+        run: npm run test:ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Upload test report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: junit-report
+          path: reports/junit.xml
+          if-no-files-found: warn
+
+      - name: Upload app build
+        uses: actions/upload-artifact@v7
+        with:
+          name: app-build
+          path: dist/
+          if-no-files-found: error
+
+  delivery:
+    name: CD - deliver one Docker image as TAR
+    needs: ci
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Build Docker image
+        run: |
+          IMAGE="task-tracker-api:sha-${GITHUB_SHA::12}"
+          echo "IMAGE=$IMAGE" >> "$GITHUB_ENV"
+          docker build -f Dockerfile -t "$IMAGE" .
+
+      - name: Smoke test container
+        run: |
+          docker run -d --name task-tracker-check -p 8080:8080 "$IMAGE"
+          for i in {1..15}; do
+            if curl --fail --silent http://127.0.0.1:8080/health | grep -q '"status":"ok"'; then
+              echo 'Docker health check: OK'
+              exit 0
+            fi
+            sleep 1
+          done
+          docker logs task-tracker-check
+          exit 1
+
+      - name: Save Docker image to TAR
+        run: |
+          docker save "$IMAGE" -o task-tracker-api.tar
+          ls -lh task-tracker-api.tar
+
+      - name: Upload Docker image artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: task-tracker-api-docker
+          path: task-tracker-api.tar
+          retention-days: 14
+          if-no-files-found: error

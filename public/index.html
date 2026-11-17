@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#f6f7f5" />
+  <title>Мої справи — Task Tracker</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="app.js" type="module"></script>
+</head>
+<body>
+  <div class="page">
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="На головну">
+        <span class="brand-mark" aria-hidden="true">✓</span>
+        <span>Мої справи</span>
+      </a>
+      <span class="project-note">Практична робота №7</span>
+    </header>
+
+    <main class="content">
+      <div class="page-heading">
+        <h1>Список завдань</h1>
+        <p>Тут можна записувати свої справи та відмічати виконані.</p>
+      </div>
+
+      <section class="task-box" aria-labelledby="task-heading">
+        <div class="box-title">
+          <h2 id="task-heading">Мої завдання</h2>
+          <span class="task-count" id="task-count">0 завдань</span>
+        </div>
+
+        <form id="task-form">
+          <label class="sr-only" for="task-title">Назва нового завдання</label>
+          <input
+            id="task-title"
+            name="title"
+            placeholder="Напиши нове завдання..."
+            maxlength="120"
+            autocomplete="off"
+            required
+          />
+          <button type="submit">Додати</button>
+        </form>
+
+        <p class="message" id="message" aria-live="polite"></p>
+
+        <div class="list-caption">
+          <span>СПИСОК СПРАВ</span>
+          <span id="task-progress">Виконано: 0 із 0</span>
+        </div>
+        <ul id="task-list" aria-live="polite"></ul>
+      </section>
+
+      <footer class="page-footer">
+        <span class="status" id="api-status">Перевірка підключення...</span>
+        <span>Task Tracker · Node.js</span>
+      </footer>
+    </main>
+  </div>
+</body>
+</html>
