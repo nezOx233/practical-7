@@ -94,7 +94,7 @@ export function createServer(store = createTaskStore()) {
 }
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === resolve(process.argv[1])) {
-  const port = Number(process.env.PORT ?? 8080);
+  const port = Number(process.env.PORT ?? 3000);
   createServer().listen(port, '0.0.0.0', () => {
     console.log(`Task Tracker працює: http://localhost:${port}`);
   });

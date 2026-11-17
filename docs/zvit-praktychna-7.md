@@ -1,56 +1,64 @@
 # Звіт з практичної роботи №7
 
 **Тема:** CI/CD на GitHub Actions  
-**Рівень:** 75 балів  
-**Студент:** _____________________  
-**Група:** _____________________  
-**Дата:** _____________________
+**Рівень виконання:** 75 балів  
+**Проєкт:** Task Tracker  
 
-## Мета
+## 1. Мета роботи
 
-Налаштувати автоматичні перевірки застосунку (CI: lint, test, build) і реалізувати delivery **одного** сервісу через артефакт Docker-образу.
+Налаштувати безперервну інтеграцію в GitHub Actions із перевіркою коду, запуском автоматичних тестів і збіркою застосунку. Реалізувати доставку одного сервісу у вигляді контейнерного артефакту.
 
-## Обраний проєкт
+## 2. Опис застосунку
 
-Task Tracker — навчальний вебзастосунок із REST API на Node.js 22. Сервіс має endpoints `GET /health`, `GET/POST /api/tasks`, `PATCH/DELETE /api/tasks/:id` і вебінтерфейс. Дані завдань зберігаються в пам'яті процесу. Проєкт містить один сервіс.
+Task Tracker — вебзастосунок на Node.js 22, який містить вебінтерфейс і REST API в межах одного сервісу. Користувач може створювати завдання, переглядати їх, змінювати статус виконання та видаляти. Дані зберігаються в пам'яті процесу. Стандартний порт застосунку — **3000**.
 
-## Реалізація CI
+Основні маршрути API: `GET /health`, `GET /api/tasks`, `POST /api/tasks`, `PATCH /api/tasks/:id`, `DELETE /api/tasks/:id`.
 
-У файлі `.github/workflows/ci.yml` налаштовано тригери `push`, `pull_request`, `workflow_dispatch`.
+## 3. Реалізація CI
 
-| Крок | Призначення |
+Конфігурація зберігається у файлі `.github/workflows/ci.yml`. Налаштовано тригери `push`, `pull_request` і `workflow_dispatch`.
+
+| Етап | Реалізація |
 |---|---|
-| `actions/checkout@v7` | Отримати вихідний код |
-| `actions/setup-node@v7` | Node.js 22, npm cache |
-| `npm ci` | Відтворюване встановлення залежностей |
-| `npm run lint` | Перевірка синтаксису JavaScript і стилю файлів |
-| `npm run test:ci` | 4 автоматичні тести, JUnit XML |
-| `npm run build` | Підготовка збірки `dist/` |
-| `upload-artifact@v7` | Артефакти `junit-report`, `app-build` |
+| Отримання коду | `actions/checkout@v7` |
+| Середовище | `actions/setup-node@v7`, Node.js 22, кеш npm |
+| Залежності | `npm ci` |
+| Перевірка коду | `npm run lint` |
+| Тести | `npm run test:ci`, 4 тести, JUnit XML |
+| Збірка | `npm run build` |
+| Артефакти | `junit-report`, `app-build` |
 
-## Реалізація delivery
+## 4. Реалізація CD
 
-Обрано **варіант B — Artifact** (за вимогами на 75 балів). Після успішного CI на `main` Docker збирає образ одного сервісу `task-tracker-api`, тестує `GET /health`, експортує образ через `docker save` у файл `task-tracker-api.tar` і завантажує його до Actions як артефакт `task-tracker-api-docker`.
+Обрано варіант B — **Artifact** для одного сервісу. Після успішного CI у гілці `main` GitHub Actions автоматично збирає Docker-образ `task-tracker-api`, запускає контейнер, перевіряє endpoint `/health` на порту **3000** та виконує `docker save` до файлу `task-tracker-api.tar`. Образ зберігається в GitHub Actions як артефакт `task-tracker-api-docker`.
 
-## Перевірка роботи
+## 5. Результати
 
-Під час підготовки проєкту локально перевірено команди `npm ci`, `npm run lint`, `npm run test:ci`, `npm run build` та HTTP-відповідь API (результати у `docs/lokalna-perevirka.md`).
+На GitHub успішно завершилися обидві задачі першого запуску:
 
-**Після публікації на GitHub:** заповніть реальні результати, збережіть скріншот зелених jobs CI та delivery і сторінки артефакту. Жоден із цих результатів не слід позначати як виконаний до запуску workflow.
+| Задача | Результат | Час |
+|---|---|---:|
+| CI — lint, tests, build | Успішно | 10 с |
+| CD — deliver one Docker image as TAR | Успішно | 18 с |
 
-## Посилання для здачі (заповнити після публікації)
+Артефакти запуску:
 
-- **Репозиторій:** `https://github.com/USERNAME/practical7-75`
-- **Успішний запуск CI/CD:** `https://github.com/USERNAME/practical7-75/actions/runs/RUN_ID`
-- **Docker-артефакт:** на сторінці вказаного запуску → **Artifacts → task-tracker-api-docker**.
-- **Бейдж статусу CI:** у кореневому `README.md`.
+| Артефакт | Розмір |
+|---|---:|
+| `app-build` | 6,2 КБ |
+| `junit-report` | 477 байт |
+| `task-tracker-api-docker` | 58,3 МБ |
 
-## Місце для скріншотів
+**Репозиторій:** https://github.com/nez0x233/practical-7  
+**Workflow:** https://github.com/nez0x233/practical-7/actions/workflows/ci.yml  
+**Успішне виконання CI/CD і Docker-артефакт:** https://github.com/nez0x233/practical-7/actions/runs/44139230694
 
-1. Успішні `CI - lint, tests, build` та `CD - deliver one Docker image as TAR` — *додати реальний скріншот після запуску*.
-2. Сторінка `Artifacts` з `task-tracker-api-docker` — *додати реальний скріншот після запуску*.
-3. Робота вебінтерфейсу або відповідь `GET /health` — *за потреби додати реальний скріншот*.
+### Підтвердження виконання
 
-## Висновок
+![Результат CI/CD: обидва jobs успішні, артефакти сформовані](assets/github-actions-success.png)
 
-У межах практичної підготовлено конфігурацію GitHub Actions для автоматичної перевірки застосунку та delivery одного Docker-сервісу у вигляді TAR-артефакту. Остаточне підтвердження роботи CI/CD потребує успішного виконання workflow у власному GitHub-репозиторії.
+*Рисунок 1 — успішне виконання GitHub Actions, завдання CI та CD і список артефактів.*
+
+## 6. Висновок
+
+Налаштовано автоматизовані перевірки коду, чотири тести та збірку застосунку в GitHub Actions. Реалізовано доставку одного сервісу через Docker-образ у форматі TAR. Успішне виконання CI/CD і публікацію артефактів підтверджено результатами GitHub Actions.
