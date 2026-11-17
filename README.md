@@ -1,6 +1,6 @@
 # Практична робота №7 — CI/CD на GitHub Actions
 
-[![CI](https://github.com/nezOx233/practical-7/actions/workflows/ci.yml/badge.svg)](https://github.com/nez0x233/practical-7/actions/workflows/ci.yml)
+[![CI](https://github.com/nezOx233/practical-7/actions/workflows/ci.yml/badge.svg)](https://github.com/nezOx233/practical-7/actions/workflows/ci.yml)
 
 **Рівень:** 75 балів  
 **Проєкт:** Task Tracker  
